@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Harta 3: curbe Bezier, arce, colțuri rotunjite și o stea -->
+  <path d="M 20 30 C 35 10, 55 15, 50 35 C 48 50, 25 55, 20 30 Z" fill="#333"/>
+  <path d="M 70 10 L 110 10 L 110 25 L 85 25 L 85 60 L 70 60 Z" fill="#333"/>
+  <path d="M 25 80 A 15 15 0 0 1 55 80 L 55 92 L 25 92 Z" fill="#333"/>
+  <rect x="8" y="104" width="34" height="10" rx="4" fill="#333"/>
+  <polygon points="92.0,75.0 96.1,86.3 108.2,86.7 98.7,94.2 102.0,105.8 92.0,99.0 82.0,105.8 85.3,94.2 75.8,86.7 87.9,86.3" fill="#333"/>
+</svg>

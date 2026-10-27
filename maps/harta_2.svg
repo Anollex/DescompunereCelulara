@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" width="160" height="100">
+  <!-- Harta 2: hartă lată, forme amestecate și un grup rotit -->
+  <ellipse cx="30" cy="20" rx="14" ry="7" fill="#333"/>
+  <polygon points="20,80 45,30 60,85" fill="#333"/>
+  <circle cx="90" cy="35" r="15" fill="#333"/>
+  <polygon points="72,68 100,62 110,90 80,95" fill="#333"/>
+  <g transform="rotate(30 127 61)">
+    <rect x="110" y="55" width="35" height="12" fill="#333"/>
+  </g>
+</svg>

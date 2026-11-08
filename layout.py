@@ -64,8 +64,8 @@ def make_layout(w, h):
     map_rect = pygame.Rect(squares_row.left, squares_row.top, side, side)
     panel_rect = pygame.Rect(squares_row.right - side, squares_row.top, side, side)
 
-    # rândul de butoane: 4 bucăți cu spații între ele
-    btn_map, btn_point, btn_step, btn_auto = split_with_gap(buttons_row, 4, pad)
+    # rândul de butoane: controls plus the map builder entry point
+    btn_map, btn_point, btn_step, btn_auto, btn_builder = split_with_gap(buttons_row, 5, pad)
 
     # rândul de slidere: în interiorul ramei, două benzi (omogen) sau una centrată (arbore)
     inner = sliders_row.inflate(-2 * pad, -2 * pad)
@@ -79,6 +79,7 @@ def make_layout(w, h):
         "tab_grid": tab_grid, "tab_tree": tab_tree, "theme": theme_btn,
         "map": map_rect, "panel": panel_rect,
         "btn_map": btn_map, "btn_point": btn_point, "btn_step": btn_step, "btn_auto": btn_auto,
+        "btn_builder": btn_builder,
         "sliders": sliders_row,
         "slider_x": slider_x, "slider_y": slider_y, "slider_depth": slider_depth,
         "label_size": max(10, side // 20),     # aceeași mărime pentru toate titlurile de panou

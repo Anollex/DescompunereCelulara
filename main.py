@@ -9,6 +9,7 @@ import pygame
 
 from config import AUTO_STEP_MS, CURVE_SAMPLES, MAPS_DIR, MIN_SIZE, THEMES
 from layout import make_layout
+from MapBuilder.map_builder import MapBuilder
 from map_view import MapView, draw_map
 from model import FINISH, START
 from render import draw_cells_overlay, draw_leaf_graph, draw_marker, draw_matrix
@@ -57,6 +58,18 @@ class MapLibrary:
                 self._cache[path] = f"Nu pot citi {path.name}"
         return self._cache[path]
 
+    def refresh(self, selected_path=None):
+        """Rescan maps after the builder creates a new SVG."""
+        current = selected_path or (self.files[self.index] if self.files else None)
+        self.files = list_maps(MAPS_DIR)
+        self._cache = {path: value for path, value in self._cache.items() if path in self.files}
+        if not self.files:
+            self.index = 0
+        elif current in self.files:
+            self.index = self.files.index(current)
+        else:
+            self.index = min(self.index, len(self.files) - 1)
+
 
 pygame.init()
 screen = pygame.display.set_mode(MIN_SIZE, pygame.RESIZABLE)
@@ -68,6 +81,7 @@ alive = True
 mode = "grid"          # "grid" = metoda omogenă, "tree" = metoda arborelui
 theme = "light"        # "light" / "dark"
 maps = MapLibrary(MAPS_DIR)
+builder = MapBuilder(on_saved=lambda path: maps.refresh(path))
 point_mode = "start"   # ce punct pui la click pe hartă: "start" / "finish"
 start = None           # punctele, în coordonate de HARTĂ
 finish = None
@@ -98,6 +112,9 @@ while alive:
     # 2. evenimente
     step_requested = False
     for ev in pygame.event.get():
+        if builder.open and getattr(getattr(ev, "window", None), "id", None) == builder.window.id:
+            builder.handle_event(ev)
+            continue
         if ev.type == pygame.QUIT:
             alive = False
         elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_ESCAPE:
@@ -122,6 +139,8 @@ while alive:
                 elif not sim.finished:
                     auto_running = True
                     last_auto_step = now - AUTO_STEP_MS   # primul pas imediat
+            elif layout["btn_builder"].collidepoint(ev.pos):
+                builder.show()
             elif view is not None and view.screen_rect().collidepoint(ev.pos):
                 point = view.to_map(*ev.pos)
                 if point_mode == "start":
@@ -183,6 +202,7 @@ while alive:
                 False, border, colors)
     draw_button(screen, layout["btn_step"], "Step", False, border, colors)
     draw_button(screen, layout["btn_auto"], "AUTO", auto_running, border, colors)
+    draw_button(screen, layout["btn_builder"], "Map Builder", False, border, colors)
 
     pygame.draw.rect(screen, colors["active"], layout["sliders"], border)   # rama sliderelor
     for key in SLIDERS_BY_MODE[mode]:
@@ -190,6 +210,7 @@ while alive:
 
     # 5. afișare, abia după ce s-a desenat tot
     pygame.display.flip()
+    builder.draw()
     clock.tick(60)        # limitează la ~60 FPS, altfel ține un core la 100%
 
 pygame.quit()

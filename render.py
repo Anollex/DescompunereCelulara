@@ -3,7 +3,7 @@ import pygame
 
 from map_view import MapView
 from model import FINISH, FREE, FRONTIER, OCCUPIED, PATH, PENDING, START, VISITED
-from widgets import get_font
+from widgets import fit_font, get_font
 
 # culoarea fiecărui cod (aceeași în ambele teme, ca să se recunoască ușor)
 CODE_COLORS = {
@@ -100,3 +100,40 @@ def draw_leaf_graph(surface, rect, bounds, cells, graph, codes, path, colors):
         center = view.to_screen(*cell.center)
         pygame.draw.circle(surface, CODE_COLORS[codes.get(cid, FREE)], center, radius)
         pygame.draw.circle(surface, colors["fg"], center, radius, 1)
+
+
+def draw_stats_table(surface, rect, header, rows, border, colors):
+    """Tabel de comparație: prima coloană e eticheta, apoi câte o coloană pe metodă."""
+    pygame.draw.rect(surface, colors["fg"], rect, border)
+    lines = [header] + rows
+    row_h = rect.h / len(lines)
+    label_w = int(rect.w * 0.46)
+    col_w = (rect.w - label_w) / (len(header) - 1)
+    size = max(10, int(row_h * 0.75))
+    pad = max(4, size // 2)
+    pygame.draw.rect(surface, colors["active"], pygame.Rect(rect.x, rect.y, rect.w, round(row_h)))
+    for r, line in enumerate(lines):
+        cy = round(rect.y + (r + 0.5) * row_h)
+        if r:
+            y = round(rect.y + r * row_h)
+            pygame.draw.line(surface, colors["active"], (rect.x, y), (rect.right - 1, y))
+        font = fit_font(line[0], label_w - 2 * pad, size)
+        text = font.render(line[0], True, colors["fg"])
+        surface.blit(text, text.get_rect(midleft=(rect.x + pad, cy)))
+        for c, value in enumerate(line[1:]):
+            font = fit_font(value, int(col_w) - 2 * pad, size)
+            text = font.render(value, True, colors["fg"])
+            surface.blit(text, text.get_rect(center=(round(rect.x + label_w + (c + 0.5) * col_w), cy)))
+    for c in range(len(header) - 1):
+        x = round(rect.x + label_w + c * col_w)
+        pygame.draw.line(surface, colors["fg"], (x, rect.y), (x, rect.bottom - 1))
+    pygame.draw.rect(surface, colors["fg"], rect, border)
+
+
+def draw_notice(surface, center, text, size, colors):
+    """Mesaj scurt de avertizare, într-o casetă peste restul interfeței."""
+    label = get_font(size).render(text, True, colors["fg"])
+    box = label.get_rect(center=center).inflate(size * 2, size)
+    pygame.draw.rect(surface, colors["bg"], box)
+    pygame.draw.rect(surface, CODE_COLORS[OCCUPIED], box, max(2, size // 8))
+    surface.blit(label, label.get_rect(center=box.center))

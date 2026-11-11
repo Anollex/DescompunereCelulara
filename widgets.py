@@ -21,6 +21,11 @@ def fit_font(text, max_w, max_h):
     return get_font(size)
 
 
+def uniform_font(texts, max_w, max_h):
+    """Un singur font pentru mai multe texte: cel mai mare la care încap toate."""
+    return min((fit_font(text, max_w, max_h) for text in texts), key=lambda font: font.get_height())
+
+
 # ---------------------------------------------------------------- slider
 
 class Slider:
@@ -75,11 +80,13 @@ class Slider:
 
 # ---------------------------------------------------------------- butoane și panouri
 
-def draw_button(surface, rect, text, active, border, colors):
+def draw_button(surface, rect, text, active, border, colors, font=None):
+    """Buton / tab. `font` se dă când mai multe butoane trebuie să aibă aceeași mărime de text."""
     if active:
         pygame.draw.rect(surface, colors["active"], rect)   # umplut doar dacă e activ
     pygame.draw.rect(surface, colors["fg"], rect, border)   # contur mereu
-    font = fit_font(text, int(rect.w * 0.9), rect.h // 2)   # textul nu iese din buton
+    if font is None:
+        font = fit_font(text, int(rect.w * 0.9), rect.h // 2)   # textul nu iese din buton
     label = font.render(text, True, colors["fg"])
     surface.blit(label, label.get_rect(center=rect.center))
 
@@ -96,15 +103,34 @@ def draw_theme_button(surface, rect, theme_name, border, colors):
         pygame.draw.circle(surface, colors["bg"], offset, radius)               # „mușcat” de altul
 
 
-def draw_panel(surface, rect, text, border, colors, size):
-    """Contur + titlu sus; întoarce zona liberă de sub titlu, pentru conținut."""
+def panel_content(rect, border, size):
+    """Zona de conținut a unui panou, sub antet. Depinde doar de dimensiuni, nu de text,
+    deci conținutul nu se mută când se schimbă mesajul din antet."""
+    inset = max(4, border * 3)
+    top = rect.y + 2 * inset + get_font(size).get_height()
+    return pygame.Rect(rect.x + inset, top, rect.w - 2 * inset, rect.bottom - inset - top)
+
+
+def draw_panel(surface, rect, title, border, colors, size, status=""):
+    """Contur + antet pe o singură linie: titlul în stânga, starea în dreapta.
+
+    Întoarce zona de conținut (aceeași ca panel_content)."""
     pygame.draw.rect(surface, colors["fg"], rect, border)
     inset = max(4, border * 3)
-    font = fit_font(text, rect.w - 2 * inset, min(size, rect.h // 2))
-    label = font.render(text, True, colors["fg"])
+    title_font = get_font(size)
+    line_h = title_font.get_height()
+    label = title_font.render(title, True, colors["fg"])
     surface.blit(label, (rect.x + inset, rect.y + inset))
-    top = rect.y + 2 * inset + label.get_height()
-    return pygame.Rect(rect.x + inset, top, rect.w - 2 * inset, rect.bottom - inset - top)
+    if status:
+        # starea se micșorează ca să încapă, dar rămâne centrată pe aceeași linie
+        room = rect.w - 3 * inset - label.get_width() - size
+        font = fit_font(status, max(10, room), size)
+        text = font.render(status, True, colors["fg"])
+        surface.blit(text, text.get_rect(midright=(rect.right - inset, rect.y + inset + line_h // 2)))
+    content = panel_content(rect, border, size)
+    y = content.y - inset // 2
+    pygame.draw.line(surface, colors["active"], (rect.x + border, y), (rect.right - border - 1, y))
+    return content
 
 
 def draw_centered_text(surface, rect, text, colors, size):

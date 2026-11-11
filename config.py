@@ -20,6 +20,7 @@ THEMES = {
 BTN_FRAC = 0.12
 SLIDER_FRAC = 0.25
 
+NOTICE_MS = 2500         # cât timp rămâne pe ecran un mesaj de avertizare
 AUTO_STEP_MS = 20        # pauza dintre doi pași la AUTO (mai mic = mai rapid)
 
 # Hărțile se citesc din folderul maps/ de lângă acest fișier, indiferent de unde pornești programul

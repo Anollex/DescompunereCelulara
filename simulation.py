@@ -8,7 +8,7 @@ Faze:
     "error"     -> startul sau finishul cade într-o celulă ocupată
 
 Interfața folosește doar: reset(params, map_data), step(), phase, message, finished,
-cell_codes(), current_cells(), decomp.
+cell_codes(), current_cells(), stats(), decomp.
 """
 import math
 from dataclasses import dataclass
@@ -52,6 +52,8 @@ class Simulation:
         self.start_id = None
         self.goal_id = None
         self.steps = 0
+        self.edges = None             # numărul de muchii, după construirea grafului
+        self.path_length = None       # lungimea drumului găsit
         self._decompose = None
         self._search = None
         self.message = "Pune start si finish, apoi Step" if not self.ready else "Apasa Step"
@@ -105,7 +107,7 @@ class Simulation:
         return True
 
     def _begin_search(self):
-        edges = sum(len(v) for v in self.decomp.graph.values()) // 2
+        edges = self.edges = sum(len(v) for v in self.decomp.graph.values()) // 2
         start = self.decomp.cell_at(self.params.start)
         goal = self.decomp.cell_at(self.params.finish)
         if start is None or not start.free:
@@ -129,6 +131,7 @@ class Simulation:
         cost = 0.0
         for a, b in zip(path, path[1:]):
             cost += math.dist(self.decomp.cells[a].center, self.decomp.cells[b].center)
+        self.path_length = cost
         self.message = f"Drum gasit: {len(path)} celule, lungime {cost:.1f}"
 
     # ------------------------------------------------------------ pentru afișare
@@ -140,6 +143,20 @@ class Simulation:
         if self.builder is not None:
             return self.builder.cells
         return {}
+
+    def stats(self) -> dict:
+        """Cifrele simulării, pentru tabul de comparație. None = încă necunoscut."""
+        cells = self.current_cells()
+        state = self.state
+        return {
+            "cells": len(cells) or None,
+            "free": sum(1 for c in cells.values() if c.free) if cells else None,
+            "edges": self.edges,
+            "steps": self.steps,
+            "visited": len(state.visited) if state is not None else None,
+            "path_cells": len(state.path) if state is not None and state.path else None,
+            "path_length": self.path_length,
+        }
 
     def cell_codes(self) -> dict[int, int]:
         """Codul de afișare al fiecărei celule (vezi constantele din model.py)."""

@@ -1,6 +1,6 @@
 """Testul „ce conține acest dreptunghi?” față de obstacolele hărții, cu shapely."""
 import shapely
-from shapely.geometry import Polygon, box
+from shapely.geometry import Point, Polygon, box
 
 FREE = "free"      # nu atinge niciun obstacol (sau doar îl atinge pe margine)
 FULL = "full"      # complet în interiorul obstacolelor
@@ -23,3 +23,8 @@ def classify(geometry, x, y, w, h):
     if geometry.contains(cell):
         return FULL
     return MIXED
+
+
+def point_on_obstacle(geometry, point):
+    """True dacă punctul (x, y) e în interiorul unui obstacol sau pe marginea lui."""
+    return bool(geometry.intersects(Point(point)))
